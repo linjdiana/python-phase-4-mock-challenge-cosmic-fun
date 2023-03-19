@@ -21,6 +21,8 @@ class Scientist(db.Model, SerializerMixin):
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     serialize_rules = ('-missions.scientist')
+    missions = db.relationship('Mission', backref = 'scientist')
+    planets = association_proxy('missions', 'planets')
 
 class Mission(db.Model, SerializerMixin):
     __tablename__ = 'missions'
@@ -47,3 +49,5 @@ class Planet(db.Model, SerializerMixin):
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     serialize_rules = ('-planet.missions')
+    missions = db.relationship('Mission', backref = 'planet')
+    scientists = association_proxy('missions', 'scientists')
