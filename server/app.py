@@ -49,12 +49,21 @@ api.add_resource(Scientists, '/scientists')
 class ScientistsByID(Resource):
     def get(self, id):
         scientist = Scientist.query.filter_by(id=id).first()
+
         if not scientist:
             return make_response({
                 "error": "Scientist not found"
             }, 404)
+
+        scientist_dict = {
+            "id": scientist.id,
+            "name": scientist.name,
+            "field_of_study": scientist.field_of_study,
+            "avatar": scientist.avatar
+        }
+
         response = make_response(
-            scientist.to_dict(rules = ('planets',)),
+            scientist_dict,
             200
         )
         return response
