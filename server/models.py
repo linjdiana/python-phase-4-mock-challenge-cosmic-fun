@@ -10,20 +10,40 @@ metadata = MetaData(naming_convention={
 
 db = SQLAlchemy(metadata=metadata)
 
+class Scientist(db.Model, SerializerMixin):
+    __tablename__ = 'scientists'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    field_of_study = db.Column(db.String)
+    avatar = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+
+    serialize_rules = ('-missions.scientist')
 
 class Mission(db.Model, SerializerMixin):
     __tablename__ = 'missions'
 
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    scientist_id = db.Column(db.Integer, db.ForeignKey('scientists.id'))
+    planet_id = db.Column(db.Integer, db.ForeignKey('planets.id')) 
 
-
-class Scientist(db.Model, SerializerMixin):
-    __tablename__ = 'scientists'
-
-    id = db.Column(db.Integer, primary_key=True)
+    serialize_rules = ('-scientist.missions', 'planet.missions',)
 
 
 class Planet(db.Model, SerializerMixin):
     __tablename__ = 'planets'
 
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    distance_from_earth = db.Column(db.String)
+    nearest_star = db.Column(db.String)
+    image = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+
+    serialize_rules = ('-planet.missions')

@@ -1,6 +1,7 @@
 from flask import Flask, request, make_response, jsonify
 from flask_cors import CORS
 from flask_migrate import Migrate
+from flask_restful import Api, Resource
 
 from models import db, Scientist, Planet, Mission
 
@@ -20,6 +21,8 @@ def index():
     response = make_response(
         {"message": "Hello Scientists!"}
     )
+
+    return response
 
 
 if __name__ == '__main__':
