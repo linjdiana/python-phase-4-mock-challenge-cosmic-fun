@@ -14,8 +14,8 @@ class Scientist(db.Model, SerializerMixin):
     __tablename__ = 'scientists'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True)
-    field_of_study = db.Column(db.String)
+    name = db.Column(db.String, nullable=False, unique=True)
+    field_of_study = db.Column(db.String, nullable=False)
     avatar = db.Column(db.String)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
@@ -25,22 +25,26 @@ class Scientist(db.Model, SerializerMixin):
     planets = association_proxy('missions', 'planet')
 
     @validates('name')
-    def validate_name(self, key, name):
-        if name == '':
-            raise ValueError('needs a name')
-        return name 
+    def validate_name(self, key, value):
+        scientists = Scientist.query.all()
+        names = [scientist.name for scientist in scientists]
+        if not value:
+            raise ValueError('Name must be provided.')
+        elif value in names:
+            raise ValueError('Name already exists.')
+        return value
 
     @validates('field_of_study')
-    def validate_field_of_study(self, key, field_of_study):
-        if field_of_study == '':
+    def validate_field_of_study(self, key, value):
+        if not value:
             raise ValueError('needs a field of study!')
-        return field_of_study
+        return value
 
 class Mission(db.Model, SerializerMixin):
     __tablename__ = 'missions'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     scientist_id = db.Column(db.Integer, db.ForeignKey('scientists.id'))
@@ -53,20 +57,25 @@ class Mission(db.Model, SerializerMixin):
         if name == '':
             raise ValueError('needs a name')
         return name 
-    @validates('scientist')
-    def validate_scientist(self, key, scientist):
-        if scientist == '':
+    @validates('scientist_id')
+    def validate_scientist(self, key, value):
+        scientists = Scientist.query.all()
+        ids = [scientist.id for scientist in scientists]
+        if not value:
             raise ValueError('needs a scientist name')
-        return scientist 
-    @validates('planet')
-    def validate_name(self, key, planet):
-        if planet == '':
+        elif not value in ids:
+            raise ValueError('Scientist must exist.')
+        return value
+    @validates('planet_id')
+    def validate_name(self, key, value):
+        planets = Planet.query.all()
+        ids = [planet.id for planet in planets]
+        if not value:
             raise ValueError('needs a planet')
-        return planet
-    @validates('missions')
-     # no same missions 
-    def validate_missions(self, key, mission):
-        pass 
+        elif not value in ids:
+            raise ValueError('Planet must exist')
+        return value
+    
 
 class Planet(db.Model, SerializerMixin):
     __tablename__ = 'planets'
